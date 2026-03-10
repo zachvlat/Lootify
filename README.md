@@ -25,4 +25,4 @@ Contributions are welcome! Feel free to open issues or submit pull requests.
 
 ## License
 
-GPL v3.
+GNU General Public License v3
