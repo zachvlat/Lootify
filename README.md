@@ -1,5 +1,5 @@
 <div align="center">
-  <img src="https://raw.githubusercontent.com/zachvlat/Lootify/refs/heads/master/app/src/main/play_store_512.png?token=GHSAT0AAAAAADW6DLYIDJ3ITUZ4TQ2Q3IVQ2NQJODA" alt="Lootify" width="200" height="200">
+  <img width="150" height="150" alt="image" src="https://github.com/user-attachments/assets/106d6f0a-dafa-4fe3-b65b-c73ba28791ce" />
 </div>
 
 
