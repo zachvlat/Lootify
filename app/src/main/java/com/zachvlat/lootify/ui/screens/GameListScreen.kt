@@ -31,6 +31,8 @@ fun GameListScreen(
     val isRefreshing by viewModel.isRefreshing.collectAsState()
     val error by viewModel.error.collectAsState()
 
+    val context = LocalContext.current
+
     Scaffold(
         topBar = {
             TopAppBar(
@@ -140,10 +142,20 @@ fun GameItem(game: FreeGame) {
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis
             )
+
+            if (game.publishedDate.isNotBlank()) {
+                Spacer(modifier = Modifier.height(4.dp))
+                Text(
+                    text = game.publishedDate,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
         }
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SourceChip(source: String) {
     val color = when (source) {

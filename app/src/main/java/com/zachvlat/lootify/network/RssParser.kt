@@ -4,6 +4,8 @@ import com.zachvlat.lootify.data.FreeGame
 import org.xmlpull.v1.XmlPullParser
 import org.xmlpull.v1.XmlPullParserFactory
 import java.io.StringReader
+import java.time.OffsetDateTime
+import java.time.format.DateTimeFormatter
 
 class RssParser {
 
@@ -80,6 +82,12 @@ class RssParser {
                         if (title.isNotBlank() && gameLink.isNotBlank()) {
                             val source = detectSource(title, gameLink)
                             val cleanTitle = cleanTitle(title)
+                            val rawDate = currentEntry["published"] ?: ""
+                            val formattedDate = try {
+                                OffsetDateTime.parse(rawDate).format(DateTimeFormatter.ofPattern("dd/MM/yyyy"))
+                            } catch (e: Exception) {
+                                rawDate.take(10)
+                            }
                             games.add(
                                 FreeGame(
                                     id = currentEntry["id"] ?: "",
@@ -87,7 +95,7 @@ class RssParser {
                                     gameLink = gameLink,
                                     postLink = currentEntry["link"] ?: "",
                                     author = currentEntry["author"] ?: "",
-                                    publishedDate = currentEntry["published"] ?: "",
+                                    publishedDate = formattedDate,
                                     source = source
                                 )
                             )
