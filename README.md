@@ -2,12 +2,16 @@
   <img width="150" height="150" alt="image" src="https://github.com/user-attachments/assets/106d6f0a-dafa-4fe3-b65b-c73ba28791ce" />
 </div>
 
-
 # Lootify
 
 Discover and claim free games from your favorite game stores!
 
 Lootify helps you keep track of free games available on Steam, GOG, Epic Games Store, and other major platforms. Never miss out on a free game again!
+
+## Screenshots
+<div>
+<img width="222" height="452" alt="image" src="https://github.com/user-attachments/assets/50aee656-41ee-496f-8dfd-1e2f242e3319"/>
+</div>
 
 ## Features
 
