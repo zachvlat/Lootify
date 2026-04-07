@@ -2,13 +2,17 @@ package com.zachvlat.lootify.ui.screens
 
 import android.content.Intent
 import android.net.Uri
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -30,13 +34,27 @@ fun GameListScreen(
     val isLoading by viewModel.isLoading.collectAsState()
     val isRefreshing by viewModel.isRefreshing.collectAsState()
     val error by viewModel.error.collectAsState()
+    val selectedFilters by viewModel.selectedFilters.collectAsState()
 
     val context = LocalContext.current
+
+    val availableSources = games.map { it.source }.distinct().sorted()
+    val filteredGames = if (selectedFilters.isEmpty()) {
+        games
+    } else {
+        games.filter { it.source in selectedFilters }
+    }
+
+    val listState = rememberLazyListState()
+
+    LaunchedEffect(selectedFilters) {
+        listState.animateScrollToItem(0)
+    }
 
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Free Game Stuff") },
+                title = { Text("Lootify") },
                 actions = {
                     IconButton(onClick = { viewModel.refreshGames() }) {
                         Icon(Icons.Default.Refresh, contentDescription = "Refresh")
@@ -45,57 +63,83 @@ fun GameListScreen(
             )
         }
     ) { paddingValues ->
-        Box(
+        Column(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues)
         ) {
-            when {
-                isLoading && games.isEmpty() -> {
-                    CircularProgressIndicator(
-                        modifier = Modifier.align(Alignment.Center)
+            if (availableSources.isNotEmpty()) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .horizontalScroll(rememberScrollState())
+                        .padding(horizontal = 16.dp, vertical = 8.dp),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    FilterChip(
+                        selected = selectedFilters.isEmpty(),
+                        onClick = { viewModel.clearFilters() },
+                        label = { Text("All") }
                     )
-                }
-                error != null && games.isEmpty() -> {
-                    Column(
-                        modifier = Modifier.align(Alignment.Center),
-                        horizontalAlignment = Alignment.CenterHorizontally
-                    ) {
-                        Text(
-                            text = "Error: ${error}",
-                            color = MaterialTheme.colorScheme.error
+                    availableSources.forEach { source ->
+                        FilterChip(
+                            selected = source in selectedFilters,
+                            onClick = { viewModel.toggleFilter(source) },
+                            label = { Text(source) }
                         )
-                        Spacer(modifier = Modifier.height(16.dp))
-                        Button(onClick = { viewModel.refreshGames() }) {
-                            Text("Retry")
-                        }
-                    }
-                }
-                games.isEmpty() -> {
-                    Text(
-                        text = "No free games found",
-                        modifier = Modifier.align(Alignment.Center)
-                    )
-                }
-                else -> {
-                    LazyColumn(
-                        modifier = Modifier.fillMaxSize(),
-                        contentPadding = PaddingValues(16.dp),
-                        verticalArrangement = Arrangement.spacedBy(12.dp)
-                    ) {
-                        items(games, key = { it.id }) { game ->
-                            GameItem(game = game)
-                        }
                     }
                 }
             }
 
-            if (isRefreshing) {
-                LinearProgressIndicator(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .align(Alignment.TopCenter)
-                )
+            Box(modifier = Modifier.weight(1f)) {
+                when {
+                    isLoading && games.isEmpty() -> {
+                        CircularProgressIndicator(
+                            modifier = Modifier.align(Alignment.Center)
+                        )
+                    }
+                    error != null && games.isEmpty() -> {
+                        Column(
+                            modifier = Modifier.align(Alignment.Center),
+                            horizontalAlignment = Alignment.CenterHorizontally
+                        ) {
+                            Text(
+                                text = "Error: ${error}",
+                                color = MaterialTheme.colorScheme.error
+                            )
+                            Spacer(modifier = Modifier.height(16.dp))
+                            Button(onClick = { viewModel.refreshGames() }) {
+                                Text("Retry")
+                            }
+                        }
+                    }
+                    filteredGames.isEmpty() -> {
+                        Text(
+                            text = "No free games found",
+                            modifier = Modifier.align(Alignment.Center)
+                        )
+                    }
+                    else -> {
+                        LazyColumn(
+                            state = listState,
+                            modifier = Modifier.fillMaxSize(),
+                            contentPadding = PaddingValues(16.dp),
+                            verticalArrangement = Arrangement.spacedBy(12.dp)
+                        ) {
+                            items(filteredGames, key = { it.id }) { game ->
+                                GameItem(game = game)
+                            }
+                        }
+                    }
+                }
+
+                if (isRefreshing) {
+                    LinearProgressIndicator(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .align(Alignment.TopCenter)
+                    )
+                }
             }
         }
     }
@@ -162,6 +206,9 @@ fun SourceChip(source: String) {
         "Steam" -> MaterialTheme.colorScheme.primary
         "Epic Games" -> MaterialTheme.colorScheme.secondary
         "GOG" -> MaterialTheme.colorScheme.tertiary
+        "Itch.io" -> MaterialTheme.colorScheme.error
+        "Microsoft" -> MaterialTheme.colorScheme.primary
+        "Fanatical" -> MaterialTheme.colorScheme.secondary
         else -> MaterialTheme.colorScheme.surfaceVariant
     }
     

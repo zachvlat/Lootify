@@ -14,12 +14,29 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
 
     private val repository = GameRepository(application)
 
+    private val _selectedFilters = MutableStateFlow<Set<String>>(emptySet())
+    val selectedFilters: StateFlow<Set<String>> = _selectedFilters.asStateFlow()
+
     val games: StateFlow<List<FreeGame>> = repository.games
     val isLoading: StateFlow<Boolean> = repository.isLoading
     val error: StateFlow<String?> = repository.error
 
     private val _isRefreshing = MutableStateFlow(false)
     val isRefreshing: StateFlow<Boolean> = _isRefreshing.asStateFlow()
+
+    fun toggleFilter(source: String) {
+        val current = _selectedFilters.value.toMutableSet()
+        if (source in current) {
+            current.remove(source)
+        } else {
+            current.add(source)
+        }
+        _selectedFilters.value = current
+    }
+
+    fun clearFilters() {
+        _selectedFilters.value = emptySet()
+    }
 
     init {
         refreshGames()
