@@ -17,7 +17,6 @@ Lootify helps you keep track of free games available on Steam, GOG, Epic Games S
 
 - 🎮 Browse free games from multiple stores
 - 🎯 Curated collection of available claims
-- 📱 Android mobile application
 
 ## About
 
